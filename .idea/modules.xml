@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/publishingsdk.iml" filepath="$PROJECT_DIR$/.idea/modules/publishingsdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/publishingsdk_main.iml" filepath="$PROJECT_DIR$/.idea/modules/publishingsdk_main.iml" group="publishingsdk" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/publishingsdk_test.iml" filepath="$PROJECT_DIR$/.idea/modules/publishingsdk_test.iml" group="publishingsdk" />
+    </modules>
+  </component>
+</project>

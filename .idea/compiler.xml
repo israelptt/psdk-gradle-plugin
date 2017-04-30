@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="psdk-gradle-plugin_main" target="1.8" />
+      <module name="psdk-gradle-plugin_test" target="1.8" />
+      <module name="psdk_main" target="1.8" />
+      <module name="psdk_test" target="1.8" />
+      <module name="publishingsdk_main" target="1.8" />
+      <module name="publishingsdk_test" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
