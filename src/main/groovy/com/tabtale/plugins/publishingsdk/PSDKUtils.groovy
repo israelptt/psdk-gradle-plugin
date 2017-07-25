@@ -1,4 +1,4 @@
-package com.tabtale.publishingsdk
+package com.tabtale.plugins.publishingsdk
 
 /**
  * Created by Rona on 03/04/2017.

@@ -1,4 +1,4 @@
-package com.tabtale.publishingsdk
+package com.tabtale.plugins.publishingsdk
 
 import org.gradle.api.GradleException
 
@@ -16,35 +16,6 @@ class PSDKPluginExtension {
     private String gatewayBuildConfigEnv
     private String store
     private List<String> projs
-
-    void initProjs() {
-        projs = ["publishingsdkcore",
-                 "configurationfetcher",
-                 "rewardedads",
-                 "monetization",
-                 "banners",
-                 "startappadsproviders",
-                 "millennialadsproviders",
-                 "inmobiadsproviders",
-                 "applovinadsproviders",
-                 "applovincustomadaptor",
-                 "startappcustomadaptor",
-                 "millennialcustomadaptor",
-                 "psdkanalytics",
-                 "gameleveldata",
-                 "runtimeconfig",
-                 "psdkyoutube",
-                 "psdkgoogleanalytics",
-                 "splash",
-                 "psdkappsflyer",
-                 "psdkunity",
-                 "ttflurryanalytics",
-                 "ttanalytics",
-                 "deltadnaanalytics",
-                 "psdkcrashtool",
-                 "ttunity",
-                 "chartboostcustomadapter"]
-    }
 
     void setIsUnityBuild(boolean isUnityBuild) {
         this.isUnityBuild = isUnityBuild
@@ -126,9 +97,6 @@ class PSDKPluginExtension {
     }
 
     List<String> getProjs() {
-        if (projs == null) {
-            initProjs()
-        }
         return projs
     }
 }

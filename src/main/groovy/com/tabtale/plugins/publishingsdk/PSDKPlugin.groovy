@@ -1,4 +1,4 @@
-package com.tabtale.publishingsdk
+package com.tabtale.plugins.publishingsdk
 
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
@@ -24,6 +24,47 @@ class PSDKPlugin implements Plugin<Project> {
     static File configFile
     static String store
     static List<String> projs
+    static def projsPackageMap
+    static def projsServicesMap
+    static def configsJSON
+
+    void initConfigsJSON() {
+        if (configsJSON != null) {
+            return
+        }
+
+        proj.exec {
+            executable 'sh'
+            args '-c', 'pip install --upgrade --user awscli'
+        }
+
+        proj.exec {
+            executable 'sh'
+            environment 'AWS_ACCESS_KEY_ID', PSDKConsts.S3_ACCESS_KEY
+            environment 'AWS_SECRET_ACCESS_KEY', PSDKConsts.S3_SECRET_KEY
+            args '-c', "~/Library/Python/2.7/bin/aws s3 cp s3://com.tabtale.repo/android/maven/psdk/artifacts/${buildType}/com/tabtale/publishingsdk/configs/${sdkVersion}/configs-${sdkVersion}.json ./PSDK_configs.json"
+        }
+
+        configsJSON = new JsonSlurper().parse(proj.file('PSDK_configs.json'))
+    }
+
+    def getProjsPackageMap() {
+        if (projsPackageMap == null) {
+            initConfigsJSON()
+            projsPackageMap = configsJSON['projs_package_map']
+        }
+
+        return projsPackageMap
+    }
+
+    def getProjsServicesMap() {
+        if (projsServicesMap == null) {
+            initConfigsJSON()
+            projsServicesMap = configsJSON['projs_services_map']
+        }
+
+        return projsServicesMap
+    }
 
     void apply(Project proj) {
         proj.extensions.create('psdk', PSDKPluginExtension)
@@ -160,6 +201,9 @@ class PSDKPlugin implements Plugin<Project> {
             return
         }
 
+        def projsPackageMapTemp = getProjsPackageMap()
+        def projsServicesMapTemp = getProjsServicesMap()
+
         def configJSONText
         try {
             configJSONText = configFile.text
@@ -176,19 +220,19 @@ class PSDKPlugin implements Plugin<Project> {
 
         if (!configJSON.containsKey('packages')) {
             println "WARNING: The 'packages' key does not exists in psdk.json so all the projects" +
-                    " will exclude from the app: ${PSDKConsts.PROJS_PACKAGE_MAP.keySet()}"
-            excludedProjs.addAll(PSDKConsts.PROJS_PACKAGE_MAP.keySet())
+                    " will include: ${projsPackageMapTemp.keySet()}"
+            projs.addAll(projsPackageMapTemp.keySet())
         } else {
-            for (psdkPackage in PSDKConsts.PROJS_PACKAGE_MAP) {
+            for (psdkPackage in projsPackageMapTemp) {
                 if (psdkPackage.value == 'include') {
                     projs.add(psdkPackage.key)
                     continue
                 }
 
                 if (!configJSON.packages.containsKey(psdkPackage.value)) {
-                    println "WARNING: The project: $psdkPackage.key exclude in the app because the " +
-                            "service: $psdkPackage.value key does not exists in psdk.json"
-                    excludedProjs.add(psdkPackage.key)
+                    println "WARNING: The package: $psdkPackage.key include in the app but this " +
+                            "package key does not exists in psdk.json"
+                    projs.add(psdkPackage.key)
                     continue
                 }
 
@@ -201,7 +245,7 @@ class PSDKPlugin implements Plugin<Project> {
             }
         }
 
-        for (projServices in PSDKConsts.PROJS_SERVICES_MAP) {
+        for (projServices in projsServicesMapTemp) {
             if (projServices.value == 'exclude') {
                 excludedProjs.add(projServices.key)
                 continue
@@ -215,15 +259,18 @@ class PSDKPlugin implements Plugin<Project> {
             def include = false
             for (psdkService in projServices.value) {
                 if (!configJSON.containsKey(psdkService)) {
-                    println "WARNING: The key: $psdkService does not exists in psdk.json"
-                    excludedProjs.add(projServices.key)
+                    println "WARNING: The service: $psdkService include in the app but this " +
+                            "service key does not exists in psdk.json"
+                    projs.add(projServices.key)
+                    include = true
                     continue
                 }
 
                 if (!configJSON."$psdkService".containsKey('included')) {
-                    println "WARNING: The 'included' key does not exists for the service: " +
-                            "$psdkService in psdk.json"
-                    excludedProjs.add(projServices.key)
+                    println "WARNING: The service: $psdkService include in the app but " +
+                            "the 'included' key does not exists for this service"
+                    projs.add(projServices.key)
+                    include = true
                     continue
                 }
 
@@ -265,5 +312,4 @@ class PSDKPlugin implements Plugin<Project> {
             compileDeps.add(proj.getDependencies().create(it))
         }
     }
-
 }
